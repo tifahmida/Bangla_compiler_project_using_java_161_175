@@ -1,47 +1,61 @@
 package lexer;
 
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        // Enable UTF-8 output in the Java terminal
-        System.setOut(new java.io.PrintStream(
-                System.out, true, java.nio.charset.StandardCharsets.UTF_8));
+        // Explicitly set stdout and stderr to UTF-8 stream output
+        try {
+            System.setOut(new java.io.PrintStream(System.out, true, StandardCharsets.UTF_8.name()));
+            System.setErr(new java.io.PrintStream(System.err, true, StandardCharsets.UTF_8.name()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        System.setErr(new java.io.PrintStream(
-                System.err, true, java.nio.charset.StandardCharsets.UTF_8));
+        String sourceCode = "সংখ্যা x = 12;\n" +
+                "দশমিক y = 5.5;\n\n" +
+                "যদি (x > 5) {\n" +
+                "    দেখাও(x);\n" +
+                "}\n" +
+                "নাহলে {\n" +
+                "    দেখাও(\"আপনার দেওয়া সংখ্যাটি 5 থেকে ছোট।\");\n" +
+                "}\n\n" +
+                "যতক্ষণ (x < 50) {\n" +
+                "    x = x + 1;\n" +
+                "    দেখাও(\"নম্বরটি 1 করে বেড়েছে\");\n" +
+                "}";
 
-        String code = """
-                সংখ্যা x = 12;
-                দশমিক y = 5.5;
+        System.out.println("========== SOURCE CODE ==========");
+        System.out.println(sourceCode);
 
-                যদি (x > 5) {
-                    দেখাও(x);
-                }
-                নাহলে {
-                    দেখাও("আপনার দেওয়া সংখ্যাটি 5 থেকে ছোট।");
-                }
+        // 1. Lexical Analysis
+        Lexer lexer = new Lexer(sourceCode);
+        List<Token> tokens = lexer.tokenize();
 
-                যতক্ষণ (x < 50) {
-                    x = x + 1;
-                    দেখাও("নম্বরটি 1 করে বেড়েছে");
-                }
-                """;
-
-        // Display the source code
-        System.out.println(code);
-
-        // Create the lexer
-        Lexer lexer = new Lexer(code);
-
-        // Scan the source code
-        List<Token> tokens = lexer.scanTokens();
-
-        // Display all tokens
+        System.out.println("\n========== TOKENS ==========");
         for (Token token : tokens) {
             System.out.println(token);
         }
+
+        // 2. Symbol Table Initialization
+        SymbolTable symbolTable = new SymbolTable();
+
+        // 3. Parsing
+        Parser parser = new Parser(tokens, symbolTable);
+        ASTNode ast = parser.parse();
+
+        System.out.println("\n========== AST / PARSE TREE ==========");
+        if (ast != null) {
+            ast.print("");
+        }
+
+        // 4. Symbol Table Output
+        symbolTable.print();
+
+        System.out.println("========== PARSING COMPLETED ==========");
+        System.out.println("AST and Symbol Table generated successfully.");
     }
 }

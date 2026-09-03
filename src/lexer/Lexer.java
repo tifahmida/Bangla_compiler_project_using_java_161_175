@@ -9,12 +9,10 @@ public class Lexer {
 
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
-
     private int start = 0;
     private int current = 0;
     private int line = 1;
 
-    // Bangla keywords
     private static final Map<String, TokenType> keywords = new HashMap<>();
 
     static {
@@ -30,137 +28,96 @@ public class Lexer {
         this.source = source;
     }
 
-    public List<Token> scanTokens() {
-
+    public List<Token> tokenize() {
         while (!isAtEnd()) {
-
             start = current;
-
             scanToken();
         }
 
         tokens.add(new Token(TokenType.EOF, "", line));
-
         return tokens;
     }
 
     private void scanToken() {
-
         char c = advance();
 
         switch (c) {
-
-            // Parentheses
             case '(':
                 addToken(TokenType.LEFT_PAREN);
                 break;
-
             case ')':
                 addToken(TokenType.RIGHT_PAREN);
                 break;
-
-            // Braces
             case '{':
                 addToken(TokenType.LEFT_BRACE);
                 break;
-
             case '}':
                 addToken(TokenType.RIGHT_BRACE);
                 break;
-
-            // Statement terminator
             case ';':
                 addToken(TokenType.SEMICOLON);
                 break;
-
-            // Arithmetic operators
             case '+':
                 addToken(TokenType.PLUS);
                 break;
-
             case '-':
                 addToken(TokenType.MINUS);
                 break;
-
             case '*':
                 addToken(TokenType.MULTIPLY);
                 break;
-
             case '/':
                 addToken(TokenType.DIVIDE);
                 break;
-
-            // Assignment or equality
             case '=':
-                addToken(
-                        match('=') ? TokenType.EQUAL : TokenType.ASSIGN);
+                addToken(match('=') ? TokenType.EQUAL : TokenType.ASSIGN);
                 break;
-
-            // Not equal
             case '!':
                 if (match('=')) {
                     addToken(TokenType.NOT_EQUAL);
                 } else {
-                    error("Unexpected character '!'.");
+                    System.err.println("Lexical Error at line " + line + ": Unexpected character '!'");
                 }
                 break;
-
-            // Less than / less than or equal
-            case '<':
-                addToken(
-                        match('=') ? TokenType.LESS_EQUAL : TokenType.LESS_THAN);
-                break;
-
-            // Greater than / greater than or equal
             case '>':
-                addToken(
-                        match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER_THAN);
+                addToken(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER_THAN);
+                break;
+            case '<':
+                addToken(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS_THAN);
                 break;
 
-            // Ignore spaces
             case ' ':
             case '\r':
             case '\t':
+                // Ignore whitespace
                 break;
 
-            // New line
             case '\n':
                 line++;
                 break;
 
-            // Anything else
-            default:
+            case '"':
+                string();
+                break;
 
+            default:
                 if (isDigit(c)) {
                     number();
-                }
-
-                else if (isIdentifierStart(c)) {
+                } else if (isBengaliLetterOrUnderscore(c)) {
                     identifier();
+                } else {
+                    System.err.println("Lexical Error at line " + line + ": Unexpected character '" + c + "'");
                 }
-
-                else if (c == '"') {
-                    string();
-                }
-
-                else {
-                    error("Unexpected character: " + c);
-                }
-
                 break;
         }
     }
 
-    // Identifier and keyword recognition
-
     private void identifier() {
-
-        while (!isAtEnd() && isIdentifierPart(peek())) {
+        while (isBengaliLetterOrUnderscore(peek()) || isDigit(peek())) {
             advance();
         }
 
         String text = source.substring(start, current);
-
         TokenType type = keywords.get(text);
 
         if (type == null) {
@@ -170,134 +127,87 @@ public class Lexer {
         addToken(type);
     }
 
-    // Number recognition
-
     private void number() {
+        boolean isDecimal = false;
 
-        while (!isAtEnd() && isDigit(peek())) {
+        while (isDigit(peek())) {
             advance();
         }
 
-        // Check for decimal point
         if (peek() == '.' && isDigit(peekNext())) {
+            isDecimal = true;
+            advance(); // Consume '.'
 
-            advance();
-
-            while (!isAtEnd() && isDigit(peek())) {
+            while (isDigit(peek())) {
                 advance();
             }
-
-            addToken(TokenType.DECIMAL_LITERAL);
-
-        } else {
-
-            addToken(TokenType.INTEGER_LITERAL);
         }
+
+        TokenType type = isDecimal ? TokenType.DECIMAL_LITERAL : TokenType.INTEGER_LITERAL;
+        addToken(type);
     }
 
-    // String recognition
-
     private void string() {
-
-        while (!isAtEnd() && peek() != '"') {
-
-            if (peek() == '\n') {
+        while (peek() != '"' && !isAtEnd()) {
+            if (peek() == '\n')
                 line++;
-            }
-
             advance();
         }
 
         if (isAtEnd()) {
-            error("Unterminated string.");
+            System.err.println("Lexical Error at line " + line + ": Unterminated string.");
             return;
         }
 
-        // Consume closing quotation mark
-        advance();
+        advance(); // The closing "
 
-        addToken(TokenType.STRING_LITERAL);
+        String value = source.substring(start + 1, current - 1);
+        addToken(TokenType.STRING_LITERAL, value);
     }
 
-    // Character checking (Updated for Bangla Unicode support)
+    private boolean match(char expected) {
+        if (isAtEnd())
+            return false;
+        if (source.charAt(current) != expected)
+            return false;
 
-    private boolean isDigit(char c) {
-        return (c >= '0' && c <= '9') || (c >= '\u09E6' && c <= '\u09EF'); // English & Bangla Digits
-    }
-
-    private boolean isIdentifierStart(char c) {
-        return Character.isLetter(c) || c == '_' || Character.getType(c) == Character.OTHER_LETTER;
-    }
-
-    private boolean isIdentifierPart(char c) {
-        int type = Character.getType(c);
-        return Character.isLetterOrDigit(c)
-                || c == '_'
-                || type == Character.NON_SPACING_MARK // Virama/Hasanta (্), Anusvara (ং)
-                || type == Character.COMBINING_SPACING_MARK // Vowel signs (া, ি, ী, etc.)
-                || type == Character.FORMAT; // ZWJ/ZWNJ
-    }
-
-    // Character movement
-
-    private char advance() {
-
-        return source.charAt(current++);
+        current++;
+        return true;
     }
 
     private char peek() {
-
-        if (isAtEnd()) {
+        if (isAtEnd())
             return '\0';
-        }
-
         return source.charAt(current);
     }
 
     private char peekNext() {
-
-        if (current + 1 >= source.length()) {
+        if (current + 1 >= source.length())
             return '\0';
-        }
-
         return source.charAt(current + 1);
     }
 
-    private boolean match(char expected) {
+    private boolean isBengaliLetterOrUnderscore(char c) {
+        return (c >= '\u0980' && c <= '\u09FF') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+    }
 
-        if (isAtEnd()) {
-            return false;
-        }
-
-        if (source.charAt(current) != expected) {
-            return false;
-        }
-
-        current++;
-
-        return true;
+    private boolean isDigit(char c) {
+        return (c >= '0' && c <= '9') || (c >= '\u09E6' && c <= '\u09EF');
     }
 
     private boolean isAtEnd() {
-
         return current >= source.length();
     }
 
-    // Token creation
-
-    private void addToken(TokenType type) {
-
-        String text = source.substring(start, current);
-
-        tokens.add(
-                new Token(type, text, line));
+    private char advance() {
+        return source.charAt(current++);
     }
 
-    // Error reporting
+    private void addToken(TokenType type) {
+        addToken(type, source.substring(start, current));
+    }
 
-    private void error(String message) {
-
-        System.err.println(
-                "Lexer Error at line " + line + ": " + message);
+    private void addToken(TokenType type, String literal) {
+        tokens.add(new Token(type, literal, line));
     }
 }
