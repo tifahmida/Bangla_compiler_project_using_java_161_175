@@ -6,8 +6,6 @@ public abstract class ASTNode {
     public abstract void print(String indent);
 }
 
-// AST NODE SUBCLASSES
-
 class ProgNode extends ASTNode {
     private final List<ASTNode> statements;
 
@@ -107,7 +105,6 @@ class DecNode extends ASTNode {
     private final ASTNode value;
     private final int line;
 
-    // Accepts 4 parameters including line number
     public DecNode(String type, String name, ASTNode value, int line) {
         this.type = type;
         this.name = name;

@@ -9,7 +9,6 @@ public class Parser {
     private int current = 0;
     private final SymbolTable symbolTable;
 
-    // Updated constructor to accept SymbolTable
     public Parser(List<Token> tokens, SymbolTable symbolTable) {
         this.tokens = tokens;
         this.symbolTable = symbolTable;

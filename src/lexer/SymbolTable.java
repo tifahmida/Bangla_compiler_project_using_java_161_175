@@ -50,12 +50,12 @@ public class SymbolTable {
     }
 
     public void print() {
-        System.out.println("\n========== SYMBOL TABLE ==========");
+        System.out.println("\n-------- SYMBOL TABLE ----------");
         System.out.println("Name\t\tType\t\tLine");
         System.out.println("----------------------------------");
         for (Symbol s : table.values()) {
             System.out.println(s.getName() + "\t\t" + s.getType() + "\t\t" + s.getLine());
         }
-        System.out.println("==================================\n");
+        System.out.println("---------------------------------\n");
     }
 }

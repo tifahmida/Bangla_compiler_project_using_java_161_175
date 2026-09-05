@@ -7,7 +7,6 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // Explicitly set stdout and stderr to UTF-8 stream output
         try {
             System.setOut(new java.io.PrintStream(System.out, true, StandardCharsets.UTF_8.name()));
             System.setErr(new java.io.PrintStream(System.err, true, StandardCharsets.UTF_8.name()));
@@ -28,14 +27,14 @@ public class Main {
                 "    দেখাও(\"নম্বরটি 1 করে বেড়েছে\");\n" +
                 "}";
 
-        System.out.println("========== SOURCE CODE ==========");
+        System.out.println("------- SOURCE CODE ---------");
         System.out.println(sourceCode);
 
         // 1. Lexical Analysis
         Lexer lexer = new Lexer(sourceCode);
         List<Token> tokens = lexer.tokenize();
 
-        System.out.println("\n========== TOKENS ==========");
+        System.out.println("\n-------- TOKENS -----------");
         for (Token token : tokens) {
             System.out.println(token);
         }
@@ -47,7 +46,7 @@ public class Main {
         Parser parser = new Parser(tokens, symbolTable);
         ASTNode ast = parser.parse();
 
-        System.out.println("\n========== AST / PARSE TREE ==========");
+        System.out.println("\n------- AST / PARSE TREE ---------");
         if (ast != null) {
             ast.print("");
         }
@@ -55,7 +54,7 @@ public class Main {
         // 4. Symbol Table Output
         symbolTable.print();
 
-        System.out.println("========== PARSING COMPLETED ==========");
+        System.out.println("--------- PARSING COMPLETED --------");
         System.out.println("AST and Symbol Table generated successfully.");
     }
 }

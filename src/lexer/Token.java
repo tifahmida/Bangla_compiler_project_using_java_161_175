@@ -26,7 +26,7 @@ public class Token {
 
     @Override
     public String toString() {
-        // Removed the extra space after single quote in lexeme
+
         return "Token{" +
                 "type=" + type +
                 ", lexeme='" + lexeme + '\'' +
