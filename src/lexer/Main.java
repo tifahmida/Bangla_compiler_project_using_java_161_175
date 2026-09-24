@@ -14,23 +14,22 @@ public class Main {
             e.printStackTrace();
         }
 
-        String sourceCode = "সংখ্যা x = 12;\n" +
-                "দশমিক y = 5.5;\n\n" +
-                "যদি (x > 5) {\n" +
+        String sourceCode = "সংখ্যা x = ১২;\n" +
+                "দশমিক y = ৫.৫;\n\n" +
+                "যদি (x > ৫) {\n" +
                 "    দেখাও(x);\n" +
                 "}\n" +
                 "নাহলে {\n" +
-                "    দেখাও(\"আপনার দেওয়া সংখ্যাটি 5 থেকে ছোট।\");\n" +
+                "    দেখাও(\"আপনার দেওয়া সংখ্যাটি ৫ থেকে ছোট।\");\n" +
                 "}\n\n" +
-                "যতক্ষণ (x < 50) {\n" +
-                "    x = x + 1;\n" +
-                "    দেখাও(\"নম্বরটি 1 করে বেড়েছে\");\n" +
+                "যতক্ষণ (x < ৫০) {\n" +
+                "    x = x + ১;\n" +
+                "    দেখাও(\"নম্বরটি ১ করে বেড়েছে\");\n" +
                 "}";
 
         System.out.println("------- SOURCE CODE ---------");
         System.out.println(sourceCode);
 
-        // 1. Lexical Analysis
         Lexer lexer = new Lexer(sourceCode);
         List<Token> tokens = lexer.tokenize();
 
@@ -39,10 +38,8 @@ public class Main {
             System.out.println(token);
         }
 
-        // 2. Symbol Table Initialization
         SymbolTable symbolTable = new SymbolTable();
 
-        // 3. Parsing
         Parser parser = new Parser(tokens, symbolTable);
         ASTNode ast = parser.parse();
 
@@ -51,7 +48,6 @@ public class Main {
             ast.print("");
         }
 
-        // 4. Symbol Table Output
         symbolTable.print();
 
         System.out.println("--------- PARSING COMPLETED --------");

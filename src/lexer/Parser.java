@@ -78,7 +78,7 @@ public class Parser {
                 "Expected ';' after declaration.");
 
         if (name != null) {
-            // Inserts declared variable into the Symbol Table
+
             symbolTable.insert(name.getLexeme(), typeToken.getLexeme(), name.getLine());
         }
 

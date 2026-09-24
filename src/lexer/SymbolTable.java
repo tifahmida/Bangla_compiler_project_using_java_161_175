@@ -50,12 +50,21 @@ public class SymbolTable {
     }
 
     public void print() {
-        System.out.println("\n-------- SYMBOL TABLE ----------");
-        System.out.println("Name\t\tType\t\tLine");
-        System.out.println("----------------------------------");
+
+        System.out.println();
+        System.out.println("================================");
+        System.out.println("          SYMBOL TABLE           ");
+        System.out.println("================================");
+
         for (Symbol s : table.values()) {
-            System.out.println(s.getName() + "\t\t" + s.getType() + "\t\t" + s.getLine());
+
+            System.out.println("Name : " + s.getName());
+            System.out.println("Type : " + s.getType());
+            System.out.println("Line : " + s.getLine());
+
+            System.out.println("--------------------------------");
         }
-        System.out.println("---------------------------------\n");
+
+        System.out.println();
     }
 }

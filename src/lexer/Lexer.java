@@ -136,7 +136,7 @@ public class Lexer {
 
         if (peek() == '.' && isDigit(peekNext())) {
             isDecimal = true;
-            advance(); // Consume '.'
+            advance();
 
             while (isDigit(peek())) {
                 advance();
@@ -159,7 +159,7 @@ public class Lexer {
             return;
         }
 
-        advance(); // The closing "
+        advance();
 
         String value = source.substring(start + 1, current - 1);
         addToken(TokenType.STRING_LITERAL, value);
